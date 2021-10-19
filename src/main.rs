@@ -1,4 +1,5 @@
 use std::io;
+use rand::Rng;
 
 struct Player {
     health: i32,
@@ -6,8 +7,12 @@ struct Player {
 }
 
 struct State {
-    location: i32, // 0 = home, 1 = dungeon
+    location: i32, // 0 = home, 1 = dungeon,
+    // 2 = treasure room
     prev_location: i32,
+    big_chungus_count: i32,
+    hagrid_count: i32,
+    treasure_room_chance: i32,
 }
 
 fn main() {
@@ -19,15 +24,22 @@ fn main() {
     let mut state: State = State {
         location: 0,
         prev_location: 1,
+        big_chungus_count: 0,
+        hagrid_count: 0,
+        treasure_room_chance: 3,
     };
 
     intro();
 
-    while true {
+    loop {
         if state.location == 0 {
-            home_screen(&player, state.location == state.prev_location);
+            home_screen(&mut player, state.location == state.prev_location);
         } else {
-            dungeon_screen(&player);
+            dungeon_screen(&mut player, &mut state);
+
+            if player.health <= 0 || state.location == 2 {
+                break;
+            }
         }
 
         println!("What do you choose to do? ");
@@ -53,23 +65,62 @@ fn main() {
             } else {
                 println!("Are you for real, Do something gargoyle!\n");
             }
+        } else if state.location == 1 {
+            state.prev_location = state.location;
+            if input == "exit" {
+                state.location = 0;
+                state.treasure_room_chance = 3;
+            }
         }
     }
+
+    if state.location != 2 {
+        println!("You have failed. Try again next time.\n");
+    } else {
+        println!("Congratulations, you made it. Go show that feudal lord who's boss!");
+    }
+
+    println!("");
+
+    print_center("STATISTICS");
+    print_center(&format!("# of Wild Big Chungus: {}", state.big_chungus_count)[..]);
+    print_center(&format!("# of Wild Hagrids: {}", state.hagrid_count)[..]);
     
 }
 
-fn dungeon_screen(player: &Player) {
+fn dungeon_screen(player: &mut Player, state: &mut State) {
     print_center("Dungeon");
 
+    let num = rand::thread_rng().gen_range(0..100);
     
+    if num < state.treasure_room_chance {
+        println!("Congratulations, you found the treasure room.");
+        state.location = 2;
+    } else if num < state.treasure_room_chance + 20 {
+        println!("You have encountered a big chungus. He trips and falls on you");
+        println!("for 20 damage!");
 
-    println!("Health: {}", player.health);
+        player.health -= 20;
+        state.big_chungus_count += 1;
+    } else {
+        println!("You encounter Hagrid. He says hi, but accidentally breaks ur hand.");
+        println!("You take 5 damage.");
+
+        player.health -= 5;
+        state.hagrid_count += 1;
+    }
+
+    if state.treasure_room_chance < 15 {
+        state.treasure_room_chance += 2;
+    }
+
+    println!("\nRemaining Health: {}", player.health);
 }
 
-fn home_screen(player: &Player, skip_text: bool) {
+fn home_screen(player: &mut Player, skip_text: bool) {
     print_center("Home");
 
-    if (!skip_text) {
+    if !skip_text {
         print_center("You ready yourself for battle with your trusty fork and knife, ");
         print_center("just as your forefathers have done before you.");
     }
@@ -104,10 +155,5 @@ fn print_center(text: &str) {
     } else {
         println!("Unable to get term size :(");
     }
-}
-
-fn isValid() {
-    let home_commands: Vec<&str> = vec!["enter"];
-    let dungeon_commands: Vec<&str> = vec!["1"];
 }
 
