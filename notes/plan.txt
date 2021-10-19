@@ -1,0 +1,29 @@
+####  Home screen:
+- Rest
+- Future - Buy equipment / items
+
+#### Dungeon
+
+Premise: Looking for treasure.
+
+5 floors 
+Mid boss - floor 3 - (Future)
+Final boss - floor 5 - (Future)
+
+#### Enemies
+Goblin
+\-> Beat enemy - gives u xp
+Orc 
+\-> Gives u xp
+
+Map for floors
+\-> left, right, up, down
+         |
+         |
+a   ----   ----  a
+         |
+         |
+
+
+State
+- Floor we're on 
